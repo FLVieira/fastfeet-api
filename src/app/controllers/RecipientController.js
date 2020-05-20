@@ -21,8 +21,17 @@ class RecipientController {
       });
       return res.json(recipients);
     } catch (err) {
-      return res.json({ error: err });
+      return res.status(400).json({ error: err });
     }
+  }
+
+  async show(req, res) {
+    const { id } = req.params;
+    const recipient = Recipient.findByPk(id);
+    if (!recipient) {
+      return res.status(400).json({ error: 'Invalid recipient.' });
+    }
+    return res.json(recipient);
   }
 
   async store(req, res) {

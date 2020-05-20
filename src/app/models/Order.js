@@ -18,4 +18,13 @@ export default class Order extends Model {
     );
     return this;
   }
+
+  static associate(models) {
+    this.belongsTo(models.Deliveryman, { foreignKey: 'deliveryman_id' });
+    this.belongsTo(models.Recipient, { foreignKey: 'recipient_id' });
+    this.belongsTo(models.File, {
+      foreignKey: 'signature_id',
+      as: 'signature_picture',
+    });
+  }
 }

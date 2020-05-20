@@ -11,8 +11,47 @@ import Queue from '../../lib/Queue';
 
 class OrderController {
   async index(req, res) {
-    const orders = await Order.findAll();
+    const orders = await Order.findAll({
+      attributes: ['id', 'product', 'canceled_at', 'start_date', 'end_date'],
+      include: [
+        {
+          model: Deliveryman,
+          attributes: ['id', 'name', 'email'],
+          include: [
+            { model: File, as: 'avatar', attributes: ['name', 'path', 'url'] },
+          ],
+        },
+        {
+          model: Recipient,
+          attributes: [
+            'id',
+            'receiver_name',
+            'street',
+            'number',
+            'adress_complement',
+            'state',
+            'city',
+            'postal_code',
+          ],
+        },
+        {
+          model: File,
+          as: 'signature_picture',
+          attributes: ['name', 'path', 'url'],
+        },
+      ],
+    });
     res.json(orders);
+  }
+
+  async show(req, res) {
+    const { id } = req.params;
+    const order = await Order.findByPk(id);
+
+    if (!order) {
+      return res.status(400).json({ error: 'Invalid order.' });
+    }
+    return res.json(order);
   }
 
   async store(req, res) {

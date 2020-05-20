@@ -21,16 +21,19 @@ routes.use(authMiddleware);
 
 // Recipients routes
 routes.get('/recipients', recipientController.index);
+routes.get('/recipients/:id', recipientController.show);
 routes.post('/recipients', recipientController.store);
 
 // Deliverymen routes
 routes.get('/deliverymen', deliverymanController.index);
+routes.get('/deliverymen/:id', deliverymanController.show);
 routes.post('/deliverymen', deliverymanController.store);
 routes.put('/deliverymen/:id', deliverymanController.update);
 routes.delete('/deliverymen/:id', deliverymanController.delete);
 
 // Orders routes
 routes.get('/orders', orderController.index);
+routes.get('/orders/:id', orderController.show);
 routes.post('/orders', orderController.store);
 routes.put('/orders/:id', orderController.update);
 routes.delete('/orders/:id', orderController.delete);
