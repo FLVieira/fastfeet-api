@@ -27,15 +27,15 @@ class RecipientController {
 
   async store(req, res) {
     const schema = Yup.object().shape({
-      receiverName: Yup.string().required('The Receiver Name is required.'),
+      receiver_name: Yup.string().required('The Receiver Name is required.'),
       street: Yup.string().required('The street is required.'),
       number: Yup.string().required('The receiver number is required.'),
-      adressComplement: Yup.string().required(
-        'The adress complement is required.',
+      adress_complement: Yup.string().required(
+        'The adress complement is required.'
       ),
       state: Yup.string().required('The state is required.'),
       city: Yup.string().required('The city is required.'),
-      postalCode: Yup.string().required('The postal code is required.'),
+      postal_code: Yup.string().required('The postal code is required.'),
     });
 
     try {
