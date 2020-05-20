@@ -6,6 +6,9 @@ import Deliveryman from '../models/Deliveryman';
 import Recipient from '../models/Recipient';
 import File from '../models/File';
 
+import NewOrderMail from '../jobs/NewOrderMail';
+import Queue from '../../lib/Queue';
+
 class OrderController {
   async index(req, res) {
     const orders = await Order.findAll();
@@ -27,7 +30,7 @@ class OrderController {
       return res.status(400).json({ error: errors });
     }
 
-    const { recipient_id, deliveryman_id } = req.body;
+    const { recipient_id, deliveryman_id, product } = req.body;
 
     const deliverymanExists = await Deliveryman.findByPk(deliveryman_id);
     if (!deliverymanExists) {
@@ -37,6 +40,24 @@ class OrderController {
     if (!recipientExists) {
       return res.status(400).json({ error: 'Invalid recipient.' });
     }
+
+    // Sending an email to the related Deliveryman
+    const context = {
+      deliverymanName: deliverymanExists.name,
+      product,
+      receiver_name: recipientExists.receiver_name,
+      street: recipientExists.street,
+      number: recipientExists.number,
+      adress_complement: recipientExists.adress_complement,
+      state: recipientExists.state,
+      city: recipientExists.city,
+      postal_code: recipientExists.postal_code,
+    };
+
+    await Queue.add(NewOrderMail.key, {
+      context,
+      deliverymanExists,
+    });
 
     const order = await Order.create(req.body);
     return res.json(order);
