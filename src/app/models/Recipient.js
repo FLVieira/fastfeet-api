@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import Sequelize, { Model } from 'sequelize';
 
 export default class Recipient extends Model {

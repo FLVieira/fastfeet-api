@@ -4,11 +4,16 @@ import { get } from 'lodash';
 import Deliveryman from '../models/Deliveryman';
 
 class DeliverymanController {
+  async index(req, res) {
+    const deliverymen = await Deliveryman.findAll();
+    res.json(deliverymen);
+  }
+
   async store(req, res) {
     const schema = Yup.object().shape({
       name: Yup.string().required('The name is required.'),
       email: Yup.string().required('The email is required.'),
-      avatar_id: Yup.string().required('The avatar_id is required.'),
+      avatar_id: Yup.string(),
     });
 
     try {
@@ -20,12 +25,78 @@ class DeliverymanController {
     }
 
     const { name, email, avatar_id } = req.body;
+
+    const deliverymanExists = await Deliveryman.findOne({
+      where: {
+        email,
+      },
+    });
+    if (deliverymanExists) {
+      return res
+        .status(400)
+        .json({ error: 'A deliveryman with this email already exists.' });
+    }
+
     const deliveryman = await Deliveryman.create({
       name,
       email,
       avatar_id,
     });
     return res.json(deliveryman);
+  }
+
+  async update(req, res) {
+    const schema = Yup.object().shape({
+      name: Yup.string(),
+      email: Yup.string(),
+      avatar_id: Yup.string(),
+    });
+
+    try {
+      // eslint-disable-next-line no-unused-vars
+      const validation = await schema.validate(req.body);
+    } catch (err) {
+      const errors = get(err, 'message', '');
+      return res.status(400).json({ error: errors });
+    }
+
+    const { email } = req.body;
+    if (email) {
+      const deliverymanExists = await Deliveryman.findOne({
+        where: {
+          email,
+        },
+      });
+      if (deliverymanExists) {
+        return res
+          .status(400)
+          .json({ error: 'A deliveryman with this email already exists.' });
+      }
+    }
+
+    const { id } = req.params;
+    const deliveryman = await Deliveryman.findByPk(id);
+
+    if (!deliveryman) {
+      return res.status(400).json({ error: 'Invalid deliveryman.' });
+    }
+
+    const updatedDeliveryman = await deliveryman.update(req.body);
+    return res.json(updatedDeliveryman);
+  }
+
+  async delete(req, res) {
+    const { id } = req.params;
+
+    const deliveryman = await Deliveryman.findByPk(id);
+
+    if (!deliveryman) {
+      return res.status(400).json({ error: 'Invalid deliveryman.' });
+    }
+
+    await deliveryman.destroy();
+
+    return res.send();
   }
 }
 
