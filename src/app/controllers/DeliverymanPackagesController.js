@@ -1,3 +1,5 @@
+import { isAfter, isBefore, setSeconds, setMinutes, setHours } from 'date-fns';
+
 import Deliveryman from '../models/Deliveryman';
 import Order from '../models/Order';
 import Recipient from '../models/Recipient';
@@ -76,10 +78,26 @@ class DeliverymanPackagesController {
       end_date = new Date();
     }
     // --
+    // Checking if the start_date is after 08:00 and before 18:00
+    /*
+    const startInterval = setSeconds(setMinutes(setHours(start_date, 8), 0), 0);
+    const endInterval = setSeconds(setMinutes(setHours(start_date, 18), 0), 0);
+
+    if (
+      isAfter(start_date, endInterval) ||
+      isBefore(start_date, startInterval)
+    ) {
+      return res.status(400).json({
+        error: 'Orders must be picked up between 08:00h and 18:00h.',
+      });
+    }
+    */
+    // --
     // The deliveryman can only do a withdraw or to finish a delivery
     const { withdraw } = req.query;
     if (withdraw === 'true') {
       try {
+        // I created a hook inside the Order model that checks if the number of withdrawals is === 5
         const updatedOrder = await orderExists.update(
           {
             start_date,

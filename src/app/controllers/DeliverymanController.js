@@ -7,7 +7,7 @@ import File from '../models/File';
 class DeliverymanController {
   async index(req, res) {
     const deliverymen = await Deliveryman.findAll({
-      attributes: ['id', 'name', 'email', 'withdrawals'],
+      attributes: ['id', 'name', 'email'],
       include: [
         { model: File, as: 'avatar', attributes: ['name', 'path', 'url'] },
       ],
@@ -17,7 +17,12 @@ class DeliverymanController {
 
   async show(req, res) {
     const { id } = req.params;
-    const deliveryman = await Deliveryman.findByPk(id);
+    const deliveryman = await Deliveryman.findByPk(id, {
+      attributes: ['id', 'name', 'email'],
+      include: [
+        { model: File, as: 'avatar', attributes: ['name', 'path', 'url'] },
+      ],
+    });
     if (!deliveryman) {
       return res.status(400).json({ error: 'Invalid deliveryman.' });
     }
