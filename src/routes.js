@@ -21,8 +21,12 @@ routes.post('/sessions', sessionController.store);
 routes.get('/deliveryman/:id/deliveries', deliverymanPackagesController.index);
 routes.put(
   '/deliveryman/:id/deliveries/:orderId',
+  upload.single('file'),
   deliverymanPackagesController.update
 );
+
+// Files routes
+routes.post('/files', upload.single('file'), fileController.store);
 
 // Routes that require authentication -----
 routes.use(authMiddleware);
@@ -45,8 +49,5 @@ routes.get('/orders/:id', orderController.show);
 routes.post('/orders', orderController.store);
 routes.put('/orders/:id', orderController.update);
 routes.delete('/orders/:id', orderController.delete);
-
-// Files routes
-routes.post('/files', upload.single('file'), fileController.store);
 
 export default routes;

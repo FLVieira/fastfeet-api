@@ -3,6 +3,7 @@ import { isAfter, isBefore, setSeconds, setMinutes, setHours } from 'date-fns';
 import Deliveryman from '../models/Deliveryman';
 import Order from '../models/Order';
 import Recipient from '../models/Recipient';
+import File from '../models/File';
 
 class DeliverymanPackagesController {
   async index(req, res) {
@@ -69,15 +70,6 @@ class DeliverymanPackagesController {
         .json({ error: 'Deliveryman not related to the package.' });
     }
     // --
-    // The keys passed below ate boolean
-    let { start_date, end_date } = req.body;
-    if (start_date) {
-      start_date = new Date();
-    }
-    if (end_date) {
-      end_date = new Date();
-    }
-    // --
     // Checking if the start_date is after 08:00 and before 18:00
     /*
     const startInterval = setSeconds(setMinutes(setHours(start_date, 8), 0), 0);
@@ -94,7 +86,10 @@ class DeliverymanPackagesController {
     */
     // --
     // The deliveryman can only do a withdraw or to finish a delivery
-    const { withdraw } = req.query;
+    const { withdraw, delivery } = req.query;
+    const start_date = new Date();
+    const end_date = new Date();
+
     if (withdraw === 'true') {
       try {
         // I created a hook inside the Order model that checks if the number of withdrawals is === 5
@@ -109,16 +104,31 @@ class DeliverymanPackagesController {
         return res.status(400).json({ error: err.message });
       }
     }
-    if (withdraw === 'false') {
-      const updatedOrder = await orderExists.update({
-        end_date,
+    if (delivery === 'true') {
+      const { originalname: name, filename: path } = req.file;
+      const file = await File.create({
+        name,
+        path,
       });
-      return res.json(updatedOrder);
+      await orderExists.update({
+        end_date,
+        signature_id: file.id,
+      });
+      const orderWithFile = await Order.findByPk(orderExists.id, {
+        include: [
+          {
+            model: File,
+            as: 'signature_picture',
+            attributes: ['url', 'id', 'path'],
+          },
+        ],
+      });
+      return res.json({ orderWithFile });
     }
     // --
     return res
       .status(400)
-      .json({ error: 'You have to specify if it ou its not a withdraw.' });
+      .json({ error: "You have to specify if it's or isn't a withdraw." });
   }
 }
 

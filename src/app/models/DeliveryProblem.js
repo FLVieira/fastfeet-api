@@ -1,17 +1,15 @@
 import Sequelize, { Model } from 'sequelize';
 
-export default class Deliveryman extends Model {
+export default class DeliveryProblem extends Model {
   static init(sequelize) {
     super.init(
       {
-        name: Sequelize.STRING,
-        email: Sequelize.STRING,
-        avatar_id: Sequelize.INTEGER,
-        withdrawals: Sequelize.INTEGER,
+        delivery_id: Sequelize.INTEGER,
+        description: Sequelize.STRING,
       },
       {
         sequelize,
-        tableName: 'deliverymen',
+        tableName: 'delivery_problems',
       }
     );
 
