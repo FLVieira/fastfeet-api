@@ -5,6 +5,7 @@ import multerConfig from './config/multer';
 import sessionController from './app/controllers/SessionController';
 import recipientController from './app/controllers/RecipientController';
 import deliverymanController from './app/controllers/DeliverymanController';
+import deliverymanPackagesController from './app/controllers/DeliverymanPackagesController';
 import orderController from './app/controllers/OrderController';
 import fileController from './app/controllers/FileController';
 
@@ -15,6 +16,13 @@ const upload = multer(multerConfig);
 
 // Session routes
 routes.post('/sessions', sessionController.store);
+
+// Deliveryman funcionalities routes
+routes.get('/deliveryman/:id/deliveries', deliverymanPackagesController.index);
+routes.put(
+  '/deliveryman/:id/deliveries/:orderId',
+  deliverymanPackagesController.update
+);
 
 // Routes that require authentication -----
 routes.use(authMiddleware);
