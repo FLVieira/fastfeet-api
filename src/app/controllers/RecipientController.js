@@ -1,3 +1,4 @@
+import { Op } from 'sequelize';
 import * as Yup from 'yup';
 import { get } from 'lodash';
 
@@ -6,7 +7,9 @@ import Recipient from '../models/Recipient';
 class RecipientController {
   async index(req, res) {
     try {
+      const recipientName = req.query.name;
       const recipients = await Recipient.findAll({
+        where: { receiver_name: { [Op.like]: `%${recipientName}%` } },
         attributes: [
           'id',
           'receiver_name',

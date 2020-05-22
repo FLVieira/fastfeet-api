@@ -1,3 +1,4 @@
+import { Op } from 'sequelize';
 import * as Yup from 'yup';
 import { get } from 'lodash';
 
@@ -6,7 +7,9 @@ import File from '../models/File';
 
 class DeliverymanController {
   async index(req, res) {
+    const deliverymanName = req.query.name;
     const deliverymen = await Deliveryman.findAll({
+      where: { name: { [Op.like]: `%${deliverymanName}%` } },
       attributes: ['id', 'name', 'email'],
       include: [
         { model: File, as: 'avatar', attributes: ['name', 'path', 'url'] },

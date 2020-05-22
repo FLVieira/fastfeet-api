@@ -1,3 +1,4 @@
+import { Op } from 'sequelize';
 import * as Yup from 'yup';
 import { get } from 'lodash';
 
@@ -11,7 +12,10 @@ import Queue from '../../lib/Queue';
 
 class OrderController {
   async index(req, res) {
+    const productSearch = req.query.product;
     const orders = await Order.findAll({
+      where: { product: { [Op.like]: `%${productSearch}%` } },
+      order: [['id', 'DESC']],
       attributes: ['id', 'product', 'canceled_at', 'start_date', 'end_date'],
       include: [
         {
@@ -104,7 +108,6 @@ class OrderController {
 
   async update(req, res) {
     const schema = Yup.object().shape({
-      signature_id: Yup.number(),
       canceled_at: Yup.date(),
       start_date: Yup.date(),
       end_date: Yup.date(),
@@ -119,17 +122,9 @@ class OrderController {
     }
 
     const { id } = req.params;
-
     const order = await Order.findByPk(id);
-
     if (!order) {
       return res.status(400).json({ error: 'Invalid order.' });
-    }
-
-    const { signature_id } = req.body;
-    const signatureExists = await File.findByPk(signature_id);
-    if (!signatureExists) {
-      return res.status(400).json({ error: 'Invalid signature.' });
     }
 
     const updatedOrder = await order.update(req.body);
