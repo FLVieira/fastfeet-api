@@ -49,9 +49,11 @@ class DeliverymanController {
 
     const { name, email, avatar_id } = req.body;
 
-    const avatarExists = await File.findByPk(avatar_id);
-    if (!avatarExists) {
-      return res.status(400).json({ error: 'Invalid avatar.' });
+    if (avatar_id) {
+      const avatarExists = await File.findByPk(avatar_id);
+      if (!avatarExists) {
+        return res.status(400).json({ error: 'Invalid avatar.' });
+      }
     }
 
     const deliverymanExists = await Deliveryman.findOne({
