@@ -29,11 +29,23 @@ class RecipientController {
 
   async show(req, res) {
     const { id } = req.params;
-    const recipient = Recipient.findByPk(id);
+    const recipient = await Recipient.findByPk(id);
     if (!recipient) {
       return res.status(400).json({ error: 'Invalid recipient.' });
     }
     return res.json(recipient);
+  }
+
+  async update(req, res) {
+    const { id } = req.params;
+    const recipient = await Recipient.findByPk(id);
+
+    if (!recipient) {
+      return res.status(400).json({ error: 'Invalid recipient.' });
+    }
+
+    const updatedRecipient = await recipient.update(req.body);
+    return res.json(updatedRecipient);
   }
 
   async store(req, res) {
@@ -81,6 +93,20 @@ class RecipientController {
     } catch (err) {
       return res.status(400).json({ error: err });
     }
+  }
+
+  async delete(req, res) {
+    const { id } = req.params;
+
+    const recipient = await Recipient.findByPk(id);
+
+    if (!recipient) {
+      return res.status(400).json({ error: 'Invalid recipient.' });
+    }
+
+    await recipient.destroy();
+
+    return res.send();
   }
 }
 

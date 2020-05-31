@@ -50,7 +50,36 @@ class OrderController {
 
   async show(req, res) {
     const { id } = req.params;
-    const order = await Order.findByPk(id);
+    const order = await Order.findByPk(id, {
+      attributes: ['id', 'product', 'canceled_at', 'start_date', 'end_date'],
+      include: [
+        {
+          model: Deliveryman,
+          attributes: ['id', 'name', 'email'],
+          include: [
+            { model: File, as: 'avatar', attributes: ['name', 'path', 'url'] },
+          ],
+        },
+        {
+          model: Recipient,
+          attributes: [
+            'id',
+            'receiver_name',
+            'street',
+            'number',
+            'adress_complement',
+            'state',
+            'city',
+            'postal_code',
+          ],
+        },
+        {
+          model: File,
+          as: 'signature_picture',
+          attributes: ['name', 'path', 'url'],
+        },
+      ],
+    });
 
     if (!order) {
       return res.status(400).json({ error: 'Invalid order.' });
@@ -107,20 +136,6 @@ class OrderController {
   }
 
   async update(req, res) {
-    const schema = Yup.object().shape({
-      canceled_at: Yup.date(),
-      start_date: Yup.date(),
-      end_date: Yup.date(),
-    });
-
-    try {
-      // eslint-disable-next-line no-unused-vars
-      const validation = await schema.validate(req.body);
-    } catch (err) {
-      const errors = get(err, 'message', '');
-      return res.status(400).json({ error: errors });
-    }
-
     const { id } = req.params;
     const order = await Order.findByPk(id);
     if (!order) {

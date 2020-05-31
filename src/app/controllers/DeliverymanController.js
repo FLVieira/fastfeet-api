@@ -21,7 +21,7 @@ class DeliverymanController {
   async show(req, res) {
     const { id } = req.params;
     const deliveryman = await Deliveryman.findByPk(id, {
-      attributes: ['id', 'name', 'email'],
+      attributes: ['id', 'name', 'email', 'created_at'],
       include: [
         { model: File, as: 'avatar', attributes: ['name', 'path', 'url'] },
       ],
@@ -38,7 +38,6 @@ class DeliverymanController {
       email: Yup.string().required('The email is required.'),
       avatar_id: Yup.number(),
     });
-
     try {
       // eslint-disable-next-line no-unused-vars
       const validation = await schema.validate(req.body);
@@ -90,30 +89,36 @@ class DeliverymanController {
       return res.status(400).json({ error: errors });
     }
 
+    const { id } = req.params;
+    const deliveryman = await Deliveryman.findByPk(id);
+
+    if (!deliveryman) {
+      return res.status(400).json({ error: 'Invalid deliveryman.' });
+    }
+
     const { email, avatar_id } = req.body;
+
     if (email) {
       const deliverymanExists = await Deliveryman.findOne({
         where: {
           email,
         },
       });
-      if (deliverymanExists) {
+      if (
+        deliverymanExists &&
+        deliverymanExists.dataValues.email !== deliveryman.dataValues.email
+      ) {
         return res
           .status(400)
           .json({ error: 'A deliveryman with this email already exists.' });
       }
     }
 
-    const avatarExists = await File.findByPk(avatar_id);
-    if (!avatarExists) {
-      return res.status(400).json({ error: 'Invalid avatar.' });
-    }
-
-    const { id } = req.params;
-    const deliveryman = await Deliveryman.findByPk(id);
-
-    if (!deliveryman) {
-      return res.status(400).json({ error: 'Invalid deliveryman.' });
+    if (avatar_id) {
+      const avatarExists = await File.findByPk(avatar_id);
+      if (!avatarExists) {
+        return res.status(400).json({ error: 'Invalid avatar.' });
+      }
     }
 
     const updatedDeliveryman = await deliveryman.update(req.body);

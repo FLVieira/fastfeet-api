@@ -21,7 +21,14 @@ class DeliverymanPackagesController {
         deliveryman_id: id,
       },
       include: { model: Recipient },
-      attributes: ['product', 'canceled_at', 'start_date', 'end_date'],
+      attributes: [
+        'id',
+        'product',
+        'created_at',
+        'canceled_at',
+        'start_date',
+        'end_date',
+      ],
     });
 
     if (delivered) {
@@ -70,27 +77,31 @@ class DeliverymanPackagesController {
         .json({ error: 'Deliveryman not related to the package.' });
     }
     // --
-    // Checking if the start_date is after 08:00 and before 18:00
-    /*
-    const startInterval = setSeconds(setMinutes(setHours(start_date, 8), 0), 0);
-    const endInterval = setSeconds(setMinutes(setHours(start_date, 18), 0), 0);
-
-    if (
-      isAfter(start_date, endInterval) ||
-      isBefore(start_date, startInterval)
-    ) {
-      return res.status(400).json({
-        error: 'Orders must be picked up between 08:00h and 18:00h.',
-      });
-    }
-    */
-    // --
     // The deliveryman can only do a withdraw or to finish a delivery
     const { withdraw, delivery } = req.query;
     const start_date = new Date();
     const end_date = new Date();
 
     if (withdraw === 'true') {
+      // Checking if the start_date is after 08:00 and before 18:00
+      const startInterval = setSeconds(
+        setMinutes(setHours(start_date, 8), 0),
+        0
+      );
+      const endInterval = setSeconds(
+        setMinutes(setHours(start_date, 18), 0),
+        0
+      );
+
+      if (
+        isAfter(start_date, endInterval) ||
+        isBefore(start_date, startInterval)
+      ) {
+        return res.status(400).json({
+          error: 'Orders must be picked up between 08:00h and 18:00h.',
+        });
+      }
+      // --
       try {
         // I created a hook inside the Order model that checks if the number of withdrawals is === 5
         const updatedOrder = await orderExists.update(
@@ -105,14 +116,15 @@ class DeliverymanPackagesController {
       }
     }
     if (delivery === 'true') {
-      const { originalname: name, filename: path } = req.file;
-      const file = await File.create({
-        name,
-        path,
-      });
+      const { signature_picture } = req.body;
+      if (!signature_picture) {
+        return res.status(400).json({
+          error: 'The signature picture is required to finish the delivery.',
+        });
+      }
       await orderExists.update({
         end_date,
-        signature_id: file.id,
+        signature_id: signature_picture,
       });
       const orderWithFile = await Order.findByPk(orderExists.id, {
         include: [
