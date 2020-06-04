@@ -98,7 +98,7 @@ class DeliverymanPackagesController {
         isBefore(start_date, startInterval)
       ) {
         return res.status(400).json({
-          error: 'Orders must be picked up between 08:00h and 18:00h.',
+          error: 'Pedidos devem ser retirados entre 08:00h e 18:00h.',
         });
       }
       // --
