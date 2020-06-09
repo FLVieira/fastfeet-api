@@ -4,7 +4,7 @@ module.exports = {
       type: Sequelize.INTEGER,
       defaultValue: 0,
       onUpdate: 'CASCADE',
-      onDelete: 'SET NULL',
+      onDelete: 'CASCADE',
       allowNull: true,
     });
   },
