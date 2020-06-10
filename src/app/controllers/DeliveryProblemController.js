@@ -12,7 +12,7 @@ import Queue from '../../lib/Queue';
 class DeliveryProblemController {
   async index(req, res) {
     const deliveryProblems = await DeliveryProblem.findAll({
-      include: [{ model: Order }],
+      include: [{ model: Order, where: { canceled_at: null } }],
       attributes: ['description', 'created_at', 'id'],
     });
     return res.json(deliveryProblems);
